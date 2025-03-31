@@ -1,0 +1,113 @@
+Clasificator de Taxonomie pentru Asigurări - Lupu Grigorie
+
+Pentru rezolvarea challenge-ului am venit cu două versiuni diferite. Versiunea inițială Version1.ipynb și
+versiunea îmbunătățită Version2.ipynb. Iar rezultatele se află în fișierul annotated_companies1.csv pentru versiunea
+inițială și annotated_companies2.csv pentru versiunea îmbunătățită.
+
+Cum am gândit întreaga soluție:
+Când m-am uitat la problema clasificării companiilor în taxonomia de asigurări, am văzut că e vorba de potrivire de
+text și înțelegerea contextului. Iată cum am abordat întreaga problemă:
+ideea de bază
+Pornind de la două seturi de date (companiile și taxonomia), am vrut să creez un "traducător" care să conecteze
+limbajul companiilor cu limbajul taxonomiei.
+
+Pașii principali ai soluției:
+
+1) Curățarea datelor - Prima dată, am făcut textul utilizabil: lowercase, eliminare punctuație, filtrare cuvinte prea
+scurte. Datele "curate" sunt mai ușor de comparat.
+2) Vectorizarea text → numere - Am transformat textul în vectori numerici folosind TF-IDF, ca să pot face calcule matematice pe text.
+3) Ponderarea câmpurilor importante - Nu toate informațiile sunt la fel de valoroase. Tagurile de business spun mai mult
+decât o descriere generală, așa că le-am dat o pondere triplă.
+4) Comparația multi-nivel - Am comparat companiile și etichetele taxonomiei în mai multe moduri:
+    - Similaritate vectorială (matematică)
+    - Potriviri exacte de fraze
+    - Potriviri la nivel de cuvinte
+    - Potriviri de domeniu de activitate
+
+
+Scorul combinat - Toate aceste comparații contribuie la un scor final care reprezintă cât de bine se potrivește o companie cu o etichetă.
+
+Intuiția din spatele abordării:
+Am gândit sistemul ca un expert uman care ar analiza o companie - nu te uiți doar la un singur cuvânt, ci:
+    - Citești toată descrierea
+    - Acorzi atenție specială la termenii de specialitate
+    - Iei în considerare domeniul de activitate
+    - Verifici dacă există potriviri clare și directe
+
+În varianta îmbunătățită, am adăugat capacitatea sistemului de a "înțelege" și sinonime, contexte mai largi și chiar
+unele relații ierarhice - la fel cum un expert cu experiență știe că "auto" și "vehicul" sunt aproape același lucru.
+
+**Abordarea pragmatică**
+
+În loc să folosesc modele complexe de machine learning care ar fi necesitat date de antrenament (pe care nu le aveam),
+am ales o abordare bazată pe reguli și similaritate, care:
+    - Funcționează bine fără date de antrenament
+    - Poate fi îmbunătățită treptat
+
+
+** Comparația Versiunilor **
+
+-- Versiunea Inițială --
+Prima implementare a clasificatorului a pus bazele sistemului cu următoarele caracteristici:
+
+-Procesare de bază a textului (normalizare și curățare)
+-Vectorizare TF-IDF standard cu unigrame și bigrame
+-Potrivire directă de termeni și cuvinte cheie
+-Identificarea domeniilor de activitate prin liste predefinite de termeni
+-Ponderarea diferită a câmpurilor (descriere, taguri, sector, etc.)
+
+-- Versiunea Îmbunătățită --
+A doua versiune a adus numeroase îmbunătățiri algoritmice și de preprocesare:
+
+-Management avansat al stopwords - Eliminarea personalizată a cuvintelor nerelevante
+-Suport pentru sinonime - Recunoașterea termenilor echivalenți prin dicționar de sinonime
+-Analiză trigrame - Captarea contextului mai amplu prin grupuri de 3 cuvinte
+-Prelucrare în loturi (batching) - Procesare eficientă pentru seturi mari de date
+-Analiza structurii taxonomiei - Identificarea relațiilor ierarhice
+-Vectorizare TF-IDF îmbunătățită - Ajustări ale parametrilor pentru performanță optimă
+-Algoritm de scoring nuanțat - Calculul scorurilor de similaritate cu mai multe componente
+-Praguri dinamice de clasificare - Adaptarea automată a pragurilor la caracteristicile datelor
+
+
+** Calculul Scorurilor de Similaritate **
+Versiunea inițială:
+
+-Similaritate vectorială TF-IDF
+-Potriviri exacte ale etichetelor
+-Potriviri la nivel de cuvânt
+-Potriviri de domeniu
+-Potriviri în câmpuri structurate
+
+Versiunea îmbunătățită adaugă:
+
+-Transformare non-liniară a similarității vectoriale
+-Potriviri de trigramă pentru context extins
+-Calcul nuanțat al relevanței de domeniu
+-Bonus pentru termeni specifici asigurărilor
+-Praguri dinamice adaptative
+
+
+** Analiza performanței **
+Versiune inițială:
+
+- Distribuție uniformă a scorurilor
+- Mai puține clasificări cu scor foarte scăzut
+- Scoruri mai mari pentru potriviri simple și directe
+
+Versiunea îmbunătățită:
+
+- Scoruri mai mari pentru potriviri complexe și contextuale
+- Distribuție bimodală a scorurilor (fie scoruri foarte mari, fie în unele cazuri foarte mici)
+- Mai multe clasificări cu scoruri ridicate
+
+Explicarea scorurilor mici din versiunea nouă:
+Un aspect interesant este că versiunea îmbunătățită poate produce uneori scoruri de incredere mici de (<10) pentru
+anumite companii care primeau scoruri moderate in versiunea initiala. Acest lucru se intampla din urmatoraele motive:
+
+- Filtrarea mai strictă a potrivirilor accidentale - versiunea mai nouă recunoaște și penalizează potrvirile care nu au
+suport contextual
+- Algoritm de scoring mai nuanțat
+- Recunoașterea ambiguității - când o companie nu se potrivește cu nicio etichetă, versiunea nouă preferă să indice
+acest lucru prin scoruri mici, în loc să ofere potrviri false cu încredere mică
+- Prag adaptiv - Versiunea nouă ajustează pragul în funcție de distribuția scorurilor, uneori preferând să returneze o
+singură potrivire mai bună decât mai multe potriviri mediocre
